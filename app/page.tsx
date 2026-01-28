@@ -52,7 +52,6 @@ export interface HearingData {
 export interface ConsultationData {
   name: string;
   email: string;
-  phone: string;
   existingUrl: string;
   additionalRequests: string;
 }
@@ -96,13 +95,9 @@ export const initialHearingData: HearingData = {
 const initialConsultationData: ConsultationData = {
   name: "",
   email: "",
-  phone: "",
   existingUrl: "",
   additionalRequests: "",
 };
-
-// Legacy function - no longer used
-// Price calculation is now handled in utils/priceCalculator.ts
 
 type Screen = "hearing" | "calculating" | "result" | "consultation" | "completion";
 
