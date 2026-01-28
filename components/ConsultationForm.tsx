@@ -13,7 +13,7 @@ interface Props {
 }
 
 const inputClass =
-  "w-full bg-gray-50 border-2 border-transparent rounded-2xl p-5 focus:bg-white focus:border-primary outline-none transition-all text-sm font-bold text-secondary placeholder:text-gray-300";
+  "w-full bg-gray-50 border-2 border-transparent rounded-2xl p-5 focus:bg-white focus:border-primary outline-none transition-all text-base font-bold text-secondary placeholder:text-gray-300";
 
 export default function ConsultationForm({ hearingData, data, onUpdate, onBack, onSubmit }: Props) {
   const priceBreakdown = calculatePrice(hearingData);
