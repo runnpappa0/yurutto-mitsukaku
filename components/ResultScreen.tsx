@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { HearingData } from "@/app/page";
 import { calculatePrice } from "@/utils/priceCalculator";
 
@@ -9,6 +12,7 @@ interface Props {
 
 export default function ResultScreen({ hearingData, onBack, onNext }: Props) {
   const breakdown = calculatePrice(hearingData);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get selected pages
   const selectedPages: string[] = [];
@@ -53,7 +57,16 @@ export default function ResultScreen({ hearingData, onBack, onNext }: Props) {
       {/* 価格表示 */}
       <div className="bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.05)] rounded-[40px] p-6 md:p-10 border-4 border-white text-center">
         <p className="text-sm font-bold text-gray-400 mb-2">━━━━━━━━━━━━━━━━━━━━</p>
-        <p className="text-sm font-bold text-gray-400 mb-4">制作費総額</p>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <p className="text-sm font-bold text-gray-400">制作費総額</p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-bold hover:bg-primary hover:text-white transition-all active:scale-95"
+            aria-label="料金に含まれるものを見る"
+          >
+            ?
+          </button>
+        </div>
         <div className="flex items-baseline justify-center">
           <span className="text-2xl font-bold text-primary mr-1">¥</span>
           <span className="text-5xl md:text-7xl font-bold text-secondary tabular-nums tracking-tighter">
@@ -152,6 +165,68 @@ export default function ResultScreen({ hearingData, onBack, onNext }: Props) {
           この内容で相談する
         </button>
       </div>
+
+      {/* モーダル */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-[40px] p-6 md:p-10 max-w-3xl w-full max-h-[70vh] md:max-h-[85vh] overflow-y-auto relative shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 閉じるボタン */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-secondary transition-all flex items-center justify-center font-bold text-xl"
+            >
+              ×
+            </button>
+
+            {/* タイトル */}
+            <h2 className="text-2xl font-bold text-secondary mb-6">料金に含まれるもの</h2>
+
+            {/* コンテンツ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">詳細デザイン</h3>
+                <p className="text-xs text-gray-600 font-bold">レイアウト設計、文章作成・リライト、写真選定・加工</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">実装</h3>
+                <p className="text-xs text-gray-600 font-bold">Studio または WordPress（Swellテーマ）を使用</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">レスポンシブ対応</h3>
+                <p className="text-xs text-gray-600 font-bold">PC・タブレット・スマホ対応</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">お問い合わせフォーム</h3>
+                <p className="text-xs text-gray-600 font-bold">標準搭載</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">基本的なSEO設定</h3>
+                <p className="text-xs text-gray-600 font-bold">タイトル、メタディスクリプション等</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-primary mb-2">修正対応</h3>
+                <p className="text-xs text-gray-600 font-bold">制作期間中は回数制限なし</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-5 md:col-span-2">
+                <h3 className="text-xs font-bold text-primary mb-2">納品後サポート</h3>
+                <p className="text-xs text-gray-600 font-bold">1ヶ月間の軽微な修正対応</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
