@@ -535,41 +535,45 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
       </section>
 
       {/* 固定ボトムエリア */}
-      <div className="sticky bottom-6 z-40 bg-secondary shadow-2xl rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center gap-4 animate-fadeInUp">
-        <div className="flex-grow flex items-center gap-6">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[10px] text-white/40 font-bold tracking-widest mb-1">選択済みページ数</span>
-            <span className="text-4xl font-bold text-white leading-none">{selectedItemsCount}</span>
+      <div className="sticky bottom-6 z-40 bg-secondary shadow-2xl rounded-[32px] p-4 md:p-6 md:p-8 flex flex-col md:flex-row items-center gap-3 md:gap-6 animate-fadeInUp">
+        {/* スマホ: 横並び、デスクトップ: 縦並び with flex-grow */}
+        <div className="flex md:flex-grow items-center gap-2 md:gap-6">
+          <div className="flex flex-row md:flex-col items-center md:items-center justify-center gap-2 md:gap-0">
+            <span className="text-[10px] text-white/40 font-bold tracking-widest md:mb-1">選択済みページ数</span>
+            <span className="text-2xl md:text-4xl font-bold text-white leading-none">{selectedItemsCount}</span>
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            onUpdate(initialHearingData);
-            setTouched(false);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          className="w-full md:w-auto px-8 py-5 rounded-2xl text-sm font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20 flex items-center justify-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          入力リセット
-        </button>
+        {/* ボタン: スマホは横並び、デスクトップも横並び */}
+        <div className="flex w-full md:w-auto gap-2 md:gap-4">
+          <button
+            onClick={() => {
+              onUpdate(initialHearingData);
+              setTouched(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full md:w-auto px-4 md:px-8 py-4 md:py-5 rounded-2xl text-xs md:text-sm font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20 flex items-center justify-center gap-1 md:gap-2"
+          >
+            <svg className="w-3 md:w-4 h-3 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            入力リセット
+          </button>
 
-        <button
-          onClick={() => {
-            setTouched(true);
-            if (isFormValid) onSubmit();
-          }}
-          className={`w-full md:w-auto px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg ${
-            isFormValid
-              ? "bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
-              : "bg-white/10 text-white/20 cursor-not-allowed"
-          }`}
-        >
-          この内容でお見積もりを算出する
-        </button>
+          <button
+            onClick={() => {
+              setTouched(true);
+              if (isFormValid) onSubmit();
+            }}
+            className={`w-full md:w-auto md:px-12 px-6 py-4 md:py-5 rounded-2xl text-xs md:text-sm font-bold transition-all shadow-lg ${
+              isFormValid
+                ? "bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
+                : "bg-white/10 text-white/20 cursor-not-allowed"
+            }`}
+          >
+            この内容でお見積もりを算出する
+          </button>
+        </div>
       </div>
 
       {touched && !isFormValid && (
