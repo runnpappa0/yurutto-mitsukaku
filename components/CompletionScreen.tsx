@@ -21,7 +21,12 @@ export default function CompletionScreen() {
       </div>
 
       <div className="flex justify-center">
-        <p className="text-xs text-gray-400 font-bold">このページを閉じて終了してください</p>
+        <a
+          href="https://mitsukaku.studio.site"
+          className="px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg bg-secondary text-white hover:bg-primary active:scale-95"
+        >
+          サービスページに戻る
+        </a>
       </div>
     </div>
   );
