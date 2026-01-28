@@ -19,7 +19,7 @@ export default function ResultScreen({ hearingData, onBack, onNext }: Props) {
   if (hearingData.pages.productMenu) selectedPages.push("商品・メニュー");
   if (hearingData.pages.facilityIntro) selectedPages.push("施設紹介");
   if (hearingData.pages.pricing) selectedPages.push("料金・プラン");
-  if (hearingData.pages.staffIntro) selectedPages.push("スタッフ紹介（固定表示）");
+  if (hearingData.pages.staffIntro) selectedPages.push("スタッフ紹介");
   if (hearingData.pages.access) selectedPages.push("アクセス");
   if (hearingData.pages.faq) selectedPages.push("FAQ・よくある質問");
   if (hearingData.pages.recruitment) selectedPages.push("採用情報");
@@ -38,7 +38,7 @@ export default function ResultScreen({ hearingData, onBack, onNext }: Props) {
   if (hearingData.galleryFeatures.portfolio) selectedGalleryFeatures.push("実績・事例紹介");
   if (hearingData.galleryFeatures.products) selectedGalleryFeatures.push("商品紹介");
   if (hearingData.galleryFeatures.testimonials) selectedGalleryFeatures.push("お客様の声");
-  if (hearingData.galleryFeatures.staff) selectedGalleryFeatures.push("スタッフ紹介（複数名を管理・更新）");
+  if (hearingData.galleryFeatures.staff) selectedGalleryFeatures.push("スタッフ紹介");
   if (hearingData.galleryFeatures.photoGallery) selectedGalleryFeatures.push("フォトギャラリー");
   if (hearingData.galleryFeatures.other > 0) selectedGalleryFeatures.push(`その他 (${hearingData.galleryFeatures.other}種類)`);
 

@@ -31,14 +31,14 @@ const DESIGN_STYLES = [
 ];
 
 const PAGES = [
-  { key: "topPage", label: "トップページ", disabled: true },
+  { key: "topPage", label: "トップページ", subLabel: "セクション数無制限", disabled: true },
   { key: "contactForm", label: "お問い合わせ", disabled: false },
   { key: "companyProfile", label: "会社概要", disabled: false },
   { key: "serviceIntro", label: "サービス紹介", disabled: false },
   { key: "productMenu", label: "商品・メニュー", disabled: false },
   { key: "facilityIntro", label: "施設紹介", disabled: false },
   { key: "pricing", label: "料金・プラン", disabled: false },
-  { key: "staffIntro", label: "スタッフ紹介（固定表示）", disabled: false },
+  { key: "staffIntro", label: "スタッフ紹介", subLabel: "固定表示", disabled: false },
   { key: "access", label: "アクセス", disabled: false },
   { key: "faq", label: "FAQ・よくある質問", disabled: false },
   { key: "recruitment", label: "採用情報", disabled: false },
@@ -55,7 +55,7 @@ const GALLERY_FEATURES = [
   { key: "portfolio", label: "実績・事例紹介" },
   { key: "products", label: "商品紹介" },
   { key: "testimonials", label: "お客様の声" },
-  { key: "staff", label: "スタッフ紹介（複数名を管理・更新）" },
+  { key: "staff", label: "スタッフ紹介", subLabel: "複数名を管理・更新" },
   { key: "photoGallery", label: "フォトギャラリー" },
 ];
 
@@ -274,9 +274,12 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
                     : "hover:bg-gray-50 cursor-pointer group"
                 }`}
               >
-                <span className={`text-sm font-bold ${page.disabled ? "text-secondary" : "text-gray-500"}`}>
+                <div className={`text-sm font-bold ${page.disabled ? "text-secondary" : "text-gray-500"}`}>
                   {page.label}
-                </span>
+                  {'subLabel' in page && page.subLabel && (
+                    <div className="text-[10px] text-gray-400 font-bold mt-0.5">{page.subLabel}</div>
+                  )}
+                </div>
 
                 {!page.disabled ? (
                   <div
@@ -459,7 +462,12 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
                 key={feature.key}
                 className="flex items-center justify-between p-5 rounded-2xl transition-all hover:bg-gray-50 cursor-pointer group"
               >
-                <span className="text-sm font-bold text-gray-500">{feature.label}</span>
+                <div className="text-sm font-bold text-gray-500">
+                  {feature.label}
+                  {'subLabel' in feature && feature.subLabel && (
+                    <div className="text-[10px] text-gray-400 font-bold mt-0.5">{feature.subLabel}</div>
+                  )}
+                </div>
 
                 <div
                   className={`w-12 h-6 rounded-full relative transition-colors ${
