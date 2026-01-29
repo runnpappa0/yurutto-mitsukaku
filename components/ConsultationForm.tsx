@@ -151,18 +151,38 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
         priceBreakdown: priceBreakdown,
       };
 
-      // GAS WebアプリにPOST（処理が完了するまで待つ）
-      await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        mode: 'no-cors', // GASはCORSヘッダーを返さないため
-      });
+      if (files.length > 0) {
+        // ファイルあり: リクエスト送信して2秒後に遷移
+        fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          mode: 'no-cors',
+        }).catch((error) => {
+          console.error('送信エラー:', error);
+        });
 
-      // リクエスト完了後に完了画面へ遷移
-      onSubmit();
+        // 2秒後に完了画面へ遷移
+        setTimeout(() => {
+          onSubmit();
+        }, 2000);
+
+      } else {
+        // ファイルなし: 通常通り完了を待つ
+        await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          mode: 'no-cors',
+        });
+
+        // リクエスト完了後に完了画面へ遷移
+        onSubmit();
+      }
 
     } catch (error) {
       console.error('送信エラー:', error);

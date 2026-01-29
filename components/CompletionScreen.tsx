@@ -20,6 +20,14 @@ export default function CompletionScreen() {
         </p>
       </div>
 
+      <div className="bg-gray-50 rounded-2xl p-4 md:p-6 border-2 border-gray-200">
+        <p className="text-xs text-gray-500 leading-relaxed font-bold text-center">
+          ※ 3日以内にご連絡がない場合は、システムエラーの可能性がございます。<br />
+          お手数ですが、再度フォームより送信いただくか、<br />
+          直接メール（studio.earthsigns@gmail.com）にてご連絡ください。
+        </p>
+      </div>
+
       <div className="flex justify-center">
         <a
           href="https://mitsukaku.studio.site"
