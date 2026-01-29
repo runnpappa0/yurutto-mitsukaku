@@ -122,7 +122,7 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // 送信時に全フィールドをチェック
     setTouched({
       name: true,
@@ -138,57 +138,34 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
 
     setIsSubmitting(true);
 
-    try {
-      // 送信データを作成（ファイルはすでにエンコード済み）
-      const payload = {
-        name: data.name,
-        email: data.email,
-        existingUrl: data.existingUrl,
-        referenceUrls: referenceUrls,
-        additionalRequests: data.additionalRequests,
-        files: files, // すでにエンコード済み
-        hearingData: hearingData,
-        priceBreakdown: priceBreakdown,
-      };
+    // 送信データを作成（ファイルはすでにエンコード済み）
+    const payload = {
+      name: data.name,
+      email: data.email,
+      existingUrl: data.existingUrl,
+      referenceUrls: referenceUrls,
+      additionalRequests: data.additionalRequests,
+      files: files, // すでにエンコード済み
+      hearingData: hearingData,
+      priceBreakdown: priceBreakdown,
+    };
 
-      if (files.length > 0) {
-        // ファイルあり: リクエスト送信して2秒後に遷移
-        fetch(GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          mode: 'no-cors',
-        }).catch((error) => {
-          console.error('送信エラー:', error);
-        });
-
-        // 2秒後に完了画面へ遷移
-        setTimeout(() => {
-          onSubmit();
-        }, 2000);
-
-      } else {
-        // ファイルなし: 通常通り完了を待つ
-        await fetch(GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          mode: 'no-cors',
-        });
-
-        // リクエスト完了後に完了画面へ遷移
-        onSubmit();
-      }
-
-    } catch (error) {
+    // リクエスト送信（2秒後に遷移）
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      mode: 'no-cors',
+    }).catch((error) => {
       console.error('送信エラー:', error);
-      alert('送信中にエラーが発生しました。もう一度お試しください。');
-      setIsSubmitting(false);
-    }
+    });
+
+    // 2秒後に完了画面へ遷移（見積もり計算と同じ待ち時間で一貫性）
+    setTimeout(() => {
+      onSubmit();
+    }, 2000);
   };
 
   return (
