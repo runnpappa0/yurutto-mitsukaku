@@ -15,12 +15,15 @@ interface Props {
 const inputClass =
   "w-full bg-gray-50 border-2 border-transparent rounded-2xl p-5 focus:bg-white focus:border-primary outline-none transition-all text-base font-bold text-secondary placeholder:text-gray-300";
 
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxQdfR2kDi_JmmkplbRdhhb06NusiDHU8jXnecLpgzBjB1oPbGf-XHiZ7WzYowrJQ5m/exec';
+
 export default function ConsultationForm({ hearingData, data, onUpdate, onBack, onSubmit }: Props) {
   const priceBreakdown = calculatePrice(hearingData);
   const totalPrice = priceBreakdown.subtotal;
   const totalItems = priceBreakdown.additionalPagesCount + priceBreakdown.blogFeaturesCount + priceBreakdown.galleryFeaturesCount;
   const [referenceUrls, setReferenceUrls] = useState(["", "", ""]);
   const [files, setFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({
     name: false,
     email: false,
@@ -56,7 +59,7 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // 送信時に全フィールドをチェック
     setTouched({
       name: true,
@@ -66,9 +69,71 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
       additionalRequests: true,
     });
 
-    if (isValid) {
-      onSubmit();
+    if (!isValid) {
+      return;
     }
+
+    setIsSubmitting(true);
+
+    try {
+      // ファイルをBase64エンコード
+      const encodedFiles = await Promise.all(
+        files.map(async (file) => {
+          const base64 = await fileToBase64(file);
+          return {
+            name: file.name,
+            data: base64,
+            mimeType: file.type,
+          };
+        })
+      );
+
+      // 送信データを作成
+      const payload = {
+        name: data.name,
+        email: data.email,
+        existingUrl: data.existingUrl,
+        referenceUrls: referenceUrls,
+        additionalRequests: data.additionalRequests,
+        files: encodedFiles,
+        hearingData: hearingData,
+        priceBreakdown: priceBreakdown,
+      };
+
+      // GAS WebアプリにPOST
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        mode: 'no-cors', // GASはCORSヘッダーを返さないため
+      });
+
+      // no-corsモードでは response.ok が使えないため、送信後すぐに成功とみなす
+      // GAS側でメール送信が成功すればOK
+      onSubmit();
+
+    } catch (error) {
+      console.error('送信エラー:', error);
+      alert('送信中にエラーが発生しました。もう一度お試しください。');
+      setIsSubmitting(false);
+    }
+  };
+
+  // ファイルをBase64に変換
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        // "data:image/png;base64," の部分を除去
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   return (
@@ -249,16 +314,29 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
       <div className="sticky bottom-6 z-40 bg-secondary shadow-2xl rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 animate-fadeInUp">
         <button
           onClick={onBack}
-          className="relative w-full md:w-auto px-8 py-5 rounded-2xl text-sm font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20 flex items-center justify-center"
+          disabled={isSubmitting}
+          className={`relative w-full md:w-auto px-8 py-5 rounded-2xl text-sm font-bold transition-all flex items-center justify-center ${
+            isSubmitting ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-white/10 text-white/60 hover:bg-white/20'
+          }`}
         >
           <svg className="absolute left-5 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           戻る
         </button>
         <button
           onClick={handleSubmit}
-          className="w-full md:w-auto flex-1 px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
+          disabled={isSubmitting}
+          className={`w-full md:w-auto flex-1 px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${
+            isSubmitting
+              ? 'bg-white/10 text-white/40 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-white hover:text-secondary active:scale-95'
+          }`}
         >
-          この内容で相談を送信する
+          {isSubmitting && (
+            <svg className="w-5 h-5 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+          )}
+          {isSubmitting ? '送信中...' : 'この内容で相談を送信する'}
         </button>
       </div>
     </div>
