@@ -56,6 +56,21 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleSubmit = () => {
+    // 送信時に全フィールドをチェック
+    setTouched({
+      name: true,
+      email: true,
+      existingUrl: true,
+      referenceUrls: [true, true, true],
+      additionalRequests: true,
+    });
+
+    if (isValid) {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="space-y-16 animate-fadeIn">
       <div className="text-center mb-16">
@@ -240,13 +255,8 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
           戻る
         </button>
         <button
-          onClick={onSubmit}
-          disabled={!isValid}
-          className={`w-full md:w-auto flex-1 px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg ${
-            isValid
-              ? "bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
-              : "bg-white/10 text-white/20 cursor-not-allowed"
-          }`}
+          onClick={handleSubmit}
+          className="w-full md:w-auto flex-1 px-12 py-5 rounded-2xl text-sm font-bold transition-all shadow-lg bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
         >
           この内容で相談を送信する
         </button>
