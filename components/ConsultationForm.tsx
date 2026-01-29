@@ -175,7 +175,7 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             </label>
             <input
               type="text"
-              placeholder="山田 太郎"
+              placeholder="山田太郎"
               className={`${inputClass} ${touched.name && !nameValid ? "border-primary" : ""}`}
               value={data.name}
               onChange={(e) => onUpdate((prev) => ({ ...prev, name: e.target.value }))}
