@@ -219,15 +219,10 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
           <input
             type="text"
             placeholder={data.industry === "その他" ? "業種を入力してください" : "例: 整骨院、ネイルサロンなど（任意）"}
-            className={`w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 focus:bg-white focus:border-primary outline-none transition-all text-base text-secondary placeholder:text-gray-300 ${
-              data.industry === "その他" && !industryDetailValid ? "border-red-500" : ""
-            }`}
+            className="w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 focus:bg-white focus:border-primary outline-none transition-all text-base text-secondary placeholder:text-gray-300"
             value={data.industryDetail}
             onChange={(e) => onUpdate((prev) => ({ ...prev, industryDetail: e.target.value }))}
           />
-          {data.industry === "その他" && !industryDetailValid && (
-            <p className="text-xs text-red-500 font-bold ml-1 mt-2">業種詳細を入力してください</p>
-          )}
         </div>
       </section>
 
