@@ -12,8 +12,6 @@
 body {
   font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
   background-color: #fcfcfc;
-  background-image: radial-gradient(#e0e0e0 0.5px, #fcfcfc 0.5px);
-  background-size: 20px 20px;
   color: #2d4259;
 }
 
