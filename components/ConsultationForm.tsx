@@ -48,6 +48,14 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+
+    // 既に5件選択されている場合は追加しない
+    if (files.length >= 5) {
+      alert('ファイルは最大5件までです');
+      e.target.value = "";
+      return;
+    }
+
     const newFiles = Array.from(e.target.files);
 
     // サイズチェック
@@ -60,19 +68,38 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
       return true;
     });
 
-    // ファイルをエンコード（選択時に実行）
-    const encodedFiles = await Promise.all(
-      validFiles.map(async (file) => {
-        const base64 = await fileToBase64(file);
-        return {
-          name: file.name,
-          data: base64,
-          mimeType: file.type,
-        };
-      })
-    );
+    if (validFiles.length === 0) {
+      e.target.value = "";
+      return;
+    }
 
-    setFiles((prev) => [...prev, ...encodedFiles].slice(0, 5));
+    console.log('ファイルをエンコード中...', validFiles.length, '件');
+
+    try {
+      // ファイルをエンコード（選択時に実行）
+      const encodedFiles = await Promise.all(
+        validFiles.map(async (file) => {
+          console.log(`エンコード開始: ${file.name}`);
+          const base64 = await fileToBase64(file);
+          console.log(`エンコード完了: ${file.name}, サイズ: ${base64.length}文字`);
+          return {
+            name: file.name,
+            data: base64,
+            mimeType: file.type,
+          };
+        })
+      );
+
+      setFiles((prev) => {
+        const newList = [...prev, ...encodedFiles].slice(0, 5);
+        console.log('ファイル保存完了:', newList.length, '件');
+        return newList;
+      });
+    } catch (error) {
+      console.error('ファイルエンコードエラー:', error);
+      alert('ファイルの処理中にエラーが発生しました');
+    }
+
     e.target.value = "";
   };
 
@@ -228,17 +255,26 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
           </div>
 
           <div className="space-y-3">
-            <label className="text-xs font-bold text-secondary">パンフレット・チラシ</label>
-            <label className="flex items-center justify-center gap-2 w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-5 cursor-pointer hover:border-primary hover:bg-white transition-all">
+            <label className="text-xs font-bold text-secondary">
+              パンフレット・チラシ {files.length > 0 && `(${files.length}/5)`}
+            </label>
+            <label className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-2xl p-5 transition-all ${
+              files.length >= 5
+                ? 'bg-gray-100 border-gray-200 cursor-not-allowed'
+                : 'bg-gray-50 border-gray-200 cursor-pointer hover:border-primary hover:bg-white'
+            }`}>
               <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
-              <span className="text-sm font-bold text-gray-400">ファイルを選択（複数可）</span>
+              <span className="text-sm font-bold text-gray-400">
+                {files.length >= 5 ? 'ファイル上限に達しました' : 'ファイルを選択（複数可）'}
+              </span>
               <input
                 type="file"
                 className="hidden"
                 accept=".pdf,.jpg,.jpeg,.png,.ppt,.pptx"
                 multiple
+                disabled={files.length >= 5}
                 onChange={handleFileChange}
               />
             </label>
