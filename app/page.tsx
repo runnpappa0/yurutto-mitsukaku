@@ -115,6 +115,16 @@ export default function Home() {
   // 画面遷移時にトップへスクロール
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // 送信完了画面に遷移したらsessionStorageをクリア
+    if (screen === "completion") {
+      sessionStorage.removeItem("hearingData");
+      // 少し遅延させてから状態もリセット（画面表示後）
+      setTimeout(() => {
+        setHearingData(initialHearingData);
+        setConsultationData(initialConsultationData);
+      }, 100);
+    }
   }, [screen]);
 
   // sessionStorage persistence
