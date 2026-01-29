@@ -95,7 +95,7 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // 送信時に全フィールドをチェック
     setTouched({
       name: true,
@@ -111,38 +111,35 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
 
     setIsSubmitting(true);
 
-    try {
-      // 送信データを作成（ファイルはすでにエンコード済み）
-      const payload = {
-        name: data.name,
-        email: data.email,
-        existingUrl: data.existingUrl,
-        referenceUrls: referenceUrls,
-        additionalRequests: data.additionalRequests,
-        files: files, // すでにエンコード済み
-        hearingData: hearingData,
-        priceBreakdown: priceBreakdown,
-      };
+    // 送信データを作成（ファイルはすでにエンコード済み）
+    const payload = {
+      name: data.name,
+      email: data.email,
+      existingUrl: data.existingUrl,
+      referenceUrls: referenceUrls,
+      additionalRequests: data.additionalRequests,
+      files: files, // すでにエンコード済み
+      hearingData: hearingData,
+      priceBreakdown: priceBreakdown,
+    };
 
-      // GAS WebアプリにPOST
-      await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        mode: 'no-cors', // GASはCORSヘッダーを返さないため
-      });
-
-      // no-corsモードでは response.ok が使えないため、送信後すぐに成功とみなす
-      // GAS側でメール送信が成功すればOK
-      onSubmit();
-
-    } catch (error) {
+    // GAS WebアプリにPOST（fire-and-forget）
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      mode: 'no-cors', // GASはCORSヘッダーを返さないため
+    }).catch((error) => {
       console.error('送信エラー:', error);
-      alert('送信中にエラーが発生しました。もう一度お試しください。');
-      setIsSubmitting(false);
-    }
+      // エラーでもユーザーには通知しない（no-corsモードではどうせ確認できない）
+    });
+
+    // レスポンスを待たずに即座に完了画面へ遷移
+    setTimeout(() => {
+      onSubmit();
+    }, 500); // 少しだけ待つ（送信中の表示を見せるため）
   };
 
   return (
