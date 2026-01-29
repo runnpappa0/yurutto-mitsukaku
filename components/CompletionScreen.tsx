@@ -8,7 +8,7 @@ export default function CompletionScreen() {
           </svg>
         </div>
         <h1 className="text-3xl md:text-5xl font-bold tracking-tighter text-secondary leading-tight">
-          送信完了しました！
+          送信完了しました
         </h1>
       </div>
 
