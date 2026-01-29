@@ -21,6 +21,13 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
   const totalItems = priceBreakdown.additionalPagesCount + priceBreakdown.blogFeaturesCount + priceBreakdown.galleryFeaturesCount;
   const [referenceUrls, setReferenceUrls] = useState(["", "", ""]);
   const [files, setFiles] = useState<File[]>([]);
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    existingUrl: false,
+    referenceUrls: [false, false, false],
+    additionalRequests: false,
+  });
 
   // Validation
   const nameValid = data.name.trim().length >= 2;
@@ -80,11 +87,12 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="text"
               placeholder="山田 太郎"
-              className={`${inputClass} ${data.name && !nameValid ? "border-primary" : ""}`}
+              className={`${inputClass} ${touched.name && !nameValid ? "border-primary" : ""}`}
               value={data.name}
               onChange={(e) => onUpdate((prev) => ({ ...prev, name: e.target.value }))}
+              onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
             />
-            {data.name && !nameValid && (
+            {touched.name && !nameValid && (
               <p className="text-xs text-primary font-bold ml-1">お名前は2文字以上で入力してください</p>
             )}
           </div>
@@ -95,11 +103,12 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="email"
               placeholder="example@mail.com"
-              className={`${inputClass} ${data.email && !emailValid ? "border-primary" : ""}`}
+              className={`${inputClass} ${touched.email && !emailValid ? "border-primary" : ""}`}
               value={data.email}
               onChange={(e) => onUpdate((prev) => ({ ...prev, email: e.target.value }))}
+              onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
             />
-            {data.email && !emailValid && (
+            {touched.email && !emailValid && (
               <p className="text-xs text-primary font-bold ml-1">有効なメールアドレスを入力してください</p>
             )}
           </div>
@@ -120,11 +129,12 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="url"
               placeholder="https://..."
-              className={`${inputClass} ${data.existingUrl && !existingUrlValid ? "border-primary" : ""}`}
+              className={`${inputClass} ${touched.existingUrl && !existingUrlValid ? "border-primary" : ""}`}
               value={data.existingUrl}
               onChange={(e) => onUpdate((prev) => ({ ...prev, existingUrl: e.target.value }))}
+              onBlur={() => setTouched((prev) => ({ ...prev, existingUrl: true }))}
             />
-            {data.existingUrl && !existingUrlValid && (
+            {touched.existingUrl && !existingUrlValid && (
               <p className="text-xs text-primary font-bold ml-1">有効なURL（https://...）を入力してください</p>
             )}
           </div>
@@ -173,15 +183,22 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
                     <input
                       type="url"
                       placeholder="https://..."
-                      className={`${inputClass} ${url && !urlValid ? "border-primary" : ""}`}
+                      className={`${inputClass} ${touched.referenceUrls[i] && !urlValid ? "border-primary" : ""}`}
                       value={url}
                       onChange={(e) => {
                         const next = [...referenceUrls];
                         next[i] = e.target.value;
                         setReferenceUrls(next);
                       }}
+                      onBlur={() => {
+                        setTouched((prev) => {
+                          const newReferenceUrls = [...prev.referenceUrls];
+                          newReferenceUrls[i] = true;
+                          return { ...prev, referenceUrls: newReferenceUrls };
+                        });
+                      }}
                     />
-                    {url && !urlValid && (
+                    {touched.referenceUrls[i] && !urlValid && (
                       <p className="text-xs text-primary font-bold ml-1 mt-1">有効なURL（https://...）を入力してください</p>
                     )}
                   </div>
@@ -196,15 +213,16 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <textarea
               rows={4}
               placeholder="ご希望の納期や特記事項など、お気軽にご記入ください"
-              className={`${inputClass} resize-none ${!additionalRequestsValid ? "border-primary" : ""}`}
+              className={`${inputClass} resize-none ${touched.additionalRequests && !additionalRequestsValid ? "border-primary" : ""}`}
               value={data.additionalRequests}
               onChange={(e) => onUpdate((prev) => ({ ...prev, additionalRequests: e.target.value }))}
+              onBlur={() => setTouched((prev) => ({ ...prev, additionalRequests: true }))}
             />
             <div className="flex items-center justify-between ml-1">
-              <p className={`text-[10px] font-bold ${!additionalRequestsValid ? "text-primary" : "text-gray-400"}`}>
+              <p className={`text-[10px] font-bold ${touched.additionalRequests && !additionalRequestsValid ? "text-primary" : "text-gray-400"}`}>
                 {data.additionalRequests.length}/500文字
               </p>
-              {!additionalRequestsValid && (
+              {touched.additionalRequests && !additionalRequestsValid && (
                 <p className="text-xs text-primary font-bold">500文字以内で入力してください</p>
               )}
             </div>
