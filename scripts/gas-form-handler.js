@@ -202,8 +202,6 @@ function saveFilesToDrive(files, customerName) {
     const customerFolderName = `${timestamp}_${customerName}`;
     const customerFolder = mainFolder.createFolder(customerFolderName);
 
-    const fileLinks = [];
-
     // 各ファイルを保存
     files.forEach((file, index) => {
       try {
@@ -212,11 +210,7 @@ function saveFilesToDrive(files, customerName) {
         const blob = Utilities.newBlob(decoded, file.mimeType, file.name);
 
         // ファイルを保存
-        const driveFile = customerFolder.createFile(blob);
-
-        // 共有リンクを取得
-        driveFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        fileLinks.push(driveFile.getUrl());
+        customerFolder.createFile(blob);
 
         Logger.log(`✅ ファイル保存: ${file.name}`);
       } catch (fileError) {
@@ -224,11 +218,9 @@ function saveFilesToDrive(files, customerName) {
       }
     });
 
-    // フォルダの共有リンクを追加
+    // フォルダの共有リンクを返す
     customerFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    const folderLink = customerFolder.getUrl();
-
-    return fileLinks.length > 0 ? `フォルダ: ${folderLink}\n${fileLinks.join('\n')}` : '';
+    return customerFolder.getUrl();
 
   } catch (error) {
     Logger.log(`❌ ドライブ保存エラー: ${error.message}`);
