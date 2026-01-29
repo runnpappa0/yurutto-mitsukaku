@@ -221,10 +221,15 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
           <input
             type="text"
             placeholder={data.industry === "その他" ? "業種を入力してください" : "例: 整骨院、ネイルサロンなど（任意）"}
-            className="w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 focus:bg-white focus:border-primary outline-none transition-all text-base text-secondary placeholder:text-gray-300"
+            className={`w-full bg-gray-50 border-2 border-transparent rounded-2xl p-4 focus:bg-white focus:border-primary outline-none transition-all text-base text-secondary placeholder:text-gray-300 ${
+              data.industry === "その他" && !industryDetailValid ? "border-red-500" : ""
+            }`}
             value={data.industryDetail}
             onChange={(e) => onUpdate((prev) => ({ ...prev, industryDetail: e.target.value }))}
           />
+          {data.industry === "その他" && !industryDetailValid && (
+            <p className="text-xs text-red-500 font-bold ml-1 mt-2">業種詳細を入力してください</p>
+          )}
         </div>
       </section>
 
@@ -585,8 +590,13 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
       </div>
 
       {touched && !isFormValid && (
-        <div className="text-center text-xs font-bold text-primary animate-pulse">
-          ※ 全ての項目を選択してください
+        <div className="fixed bottom-28 left-0 right-0 flex justify-center z-30 animate-fadeIn">
+          <div className="bg-red-500 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-lg">
+            {!data.objective && "※ 目的を選択してください"}
+            {data.objective && !data.industry && "※ 業種を選択してください"}
+            {data.objective && data.industry && !industryDetailValid && "※ 業種詳細を入力してください"}
+            {data.objective && data.industry && industryDetailValid && !data.designStyle && "※ デザインイメージを選択してください"}
+          </div>
         </div>
       )}
     </div>

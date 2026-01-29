@@ -22,12 +22,26 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
   const [referenceUrls, setReferenceUrls] = useState(["", "", ""]);
   const [files, setFiles] = useState<File[]>([]);
 
-  const isValid = data.name.trim().length >= 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
+  // Validation
+  const nameValid = data.name.trim().length >= 2;
+  const emailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(data.email);
+  const existingUrlValid = !data.existingUrl || /^https?:\/\/.+/.test(data.existingUrl);
+  const referenceUrlsValid = referenceUrls.every(url => !url || /^https?:\/\/.+/.test(url));
+  const additionalRequestsValid = data.additionalRequests.length <= 500;
+  const isValid = nameValid && emailValid && existingUrlValid && referenceUrlsValid && additionalRequestsValid;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...newFiles].slice(0, 5));
+    const validFiles = newFiles.filter(file => {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert(`${file.name} は5MBを超えているためアップロードできません`);
+        return false;
+      }
+      return true;
+    });
+    setFiles((prev) => [...prev, ...validFiles].slice(0, 5));
     e.target.value = "";
   };
 
@@ -66,10 +80,13 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="text"
               placeholder="山田 太郎"
-              className={inputClass}
+              className={`${inputClass} ${data.name && !nameValid ? "border-red-500" : ""}`}
               value={data.name}
               onChange={(e) => onUpdate((prev) => ({ ...prev, name: e.target.value }))}
             />
+            {data.name && !nameValid && (
+              <p className="text-xs text-red-500 font-bold ml-1">お名前は2文字以上で入力してください</p>
+            )}
           </div>
           <div className="space-y-3">
             <label className="text-xs font-bold text-secondary">
@@ -78,10 +95,13 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="email"
               placeholder="example@mail.com"
-              className={inputClass}
+              className={`${inputClass} ${data.email && !emailValid ? "border-red-500" : ""}`}
               value={data.email}
               onChange={(e) => onUpdate((prev) => ({ ...prev, email: e.target.value }))}
             />
+            {data.email && !emailValid && (
+              <p className="text-xs text-red-500 font-bold ml-1">有効なメールアドレスを入力してください</p>
+            )}
           </div>
         </div>
       </section>
@@ -100,10 +120,13 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <input
               type="url"
               placeholder="https://..."
-              className={inputClass}
+              className={`${inputClass} ${data.existingUrl && !existingUrlValid ? "border-red-500" : ""}`}
               value={data.existingUrl}
               onChange={(e) => onUpdate((prev) => ({ ...prev, existingUrl: e.target.value }))}
             />
+            {data.existingUrl && !existingUrlValid && (
+              <p className="text-xs text-red-500 font-bold ml-1">有効なURL（https://...）を入力してください</p>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -143,20 +166,27 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
           <div className="space-y-3">
             <label className="text-xs font-bold text-secondary">参考サイト・お気に入りのサイト</label>
             <div className="space-y-2">
-              {referenceUrls.map((url, i) => (
-                <input
-                  key={i}
-                  type="url"
-                  placeholder="https://..."
-                  className={inputClass}
-                  value={url}
-                  onChange={(e) => {
-                    const next = [...referenceUrls];
-                    next[i] = e.target.value;
-                    setReferenceUrls(next);
-                  }}
-                />
-              ))}
+              {referenceUrls.map((url, i) => {
+                const urlValid = !url || /^https?:\/\/.+/.test(url);
+                return (
+                  <div key={i}>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      className={`${inputClass} ${url && !urlValid ? "border-red-500" : ""}`}
+                      value={url}
+                      onChange={(e) => {
+                        const next = [...referenceUrls];
+                        next[i] = e.target.value;
+                        setReferenceUrls(next);
+                      }}
+                    />
+                    {url && !urlValid && (
+                      <p className="text-xs text-red-500 font-bold ml-1 mt-1">有効なURL（https://...）を入力してください</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <p className="text-[10px] text-gray-400 font-bold ml-1">「こんなサイトにしたい」というイメージに近いサイトのURLなど</p>
           </div>
@@ -166,11 +196,18 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
             <textarea
               rows={4}
               placeholder="ご希望の納期や特記事項など、お気軽にご記入ください"
-              className={`${inputClass} resize-none`}
+              className={`${inputClass} resize-none ${!additionalRequestsValid ? "border-red-500" : ""}`}
               value={data.additionalRequests}
               onChange={(e) => onUpdate((prev) => ({ ...prev, additionalRequests: e.target.value }))}
             />
-            <p className="text-[10px] text-gray-400 font-bold ml-1">500文字以内</p>
+            <div className="flex items-center justify-between ml-1">
+              <p className={`text-[10px] font-bold ${!additionalRequestsValid ? "text-red-500" : "text-gray-400"}`}>
+                {data.additionalRequests.length}/500文字
+              </p>
+              {!additionalRequestsValid && (
+                <p className="text-xs text-red-500 font-bold">500文字以内で入力してください</p>
+              )}
+            </div>
           </div>
         </div>
       </section>
