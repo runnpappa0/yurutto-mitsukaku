@@ -590,7 +590,7 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
       </div>
 
       {touched && !isFormValid && (
-        <div className="fixed bottom-28 left-0 right-0 flex justify-center z-30 animate-fadeIn">
+        <div className="fixed bottom-32 md:bottom-36 left-0 right-0 flex justify-center z-50 animate-fadeIn px-4">
           <div className="bg-red-500 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-lg">
             {!data.objective && "※ 目的を選択してください"}
             {data.objective && !data.industry && "※ 業種を選択してください"}
