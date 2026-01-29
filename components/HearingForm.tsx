@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import type { HearingData } from "@/app/page";
 import { initialHearingData } from "@/app/page";
 import { calculatePrice } from "@/utils/priceCalculator";
@@ -66,8 +66,6 @@ interface Props {
 }
 
 export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
-  const [touched, setTouched] = useState(false);
-
   const handlePageToggle = (key: string) => {
     onUpdate((prev) => ({
       ...prev,
@@ -562,7 +560,6 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
           <button
             onClick={() => {
               onUpdate(initialHearingData);
-              setTouched(false);
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             className="w-full md:w-auto px-4 md:px-8 py-4 md:py-5 rounded-2xl text-xs md:text-sm font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20 flex items-center justify-center gap-1 md:gap-2"
@@ -575,9 +572,9 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
 
           <button
             onClick={() => {
-              setTouched(true);
               if (isFormValid) onSubmit();
             }}
+            disabled={!isFormValid}
             className={`w-full md:w-auto md:px-12 px-6 py-4 md:py-5 rounded-2xl text-xs md:text-sm font-bold transition-all shadow-lg ${
               isFormValid
                 ? "bg-primary text-white hover:bg-white hover:text-secondary active:scale-95"
@@ -588,17 +585,6 @@ export default function HearingForm({ data, onUpdate, onSubmit }: Props) {
           </button>
         </div>
       </div>
-
-      {touched && !isFormValid && (
-        <div className="fixed bottom-32 md:bottom-36 left-0 right-0 flex justify-center z-50 animate-fadeIn px-4">
-          <div className="bg-red-500 text-white text-xs font-bold px-6 py-3 rounded-2xl shadow-lg">
-            {!data.objective && "※ 目的を選択してください"}
-            {data.objective && !data.industry && "※ 業種を選択してください"}
-            {data.objective && data.industry && !industryDetailValid && "※ 業種詳細を入力してください"}
-            {data.objective && data.industry && industryDetailValid && !data.designStyle && "※ デザインイメージを選択してください"}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
