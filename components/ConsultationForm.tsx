@@ -17,12 +17,18 @@ const inputClass =
 
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxQdfR2kDi_JmmkplbRdhhb06NusiDHU8jXnecLpgzBjB1oPbGf-XHiZ7WzYowrJQ5m/exec';
 
+interface EncodedFile {
+  name: string;
+  data: string;
+  mimeType: string;
+}
+
 export default function ConsultationForm({ hearingData, data, onUpdate, onBack, onSubmit }: Props) {
   const priceBreakdown = calculatePrice(hearingData);
   const totalPrice = priceBreakdown.subtotal;
   const totalItems = priceBreakdown.additionalPagesCount + priceBreakdown.blogFeaturesCount + priceBreakdown.galleryFeaturesCount;
   const [referenceUrls, setReferenceUrls] = useState(["", "", ""]);
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<EncodedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({
     name: false,
@@ -40,9 +46,11 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
   const additionalRequestsValid = data.additionalRequests.length <= 500;
   const isValid = nameValid && emailValid && existingUrlValid && referenceUrlsValid && additionalRequestsValid;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
+
+    // サイズチェック
     const validFiles = newFiles.filter(file => {
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
@@ -51,8 +59,36 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
       }
       return true;
     });
-    setFiles((prev) => [...prev, ...validFiles].slice(0, 5));
+
+    // ファイルをエンコード（選択時に実行）
+    const encodedFiles = await Promise.all(
+      validFiles.map(async (file) => {
+        const base64 = await fileToBase64(file);
+        return {
+          name: file.name,
+          data: base64,
+          mimeType: file.type,
+        };
+      })
+    );
+
+    setFiles((prev) => [...prev, ...encodedFiles].slice(0, 5));
     e.target.value = "";
+  };
+
+  // ファイルをBase64に変換
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        // "data:image/png;base64," の部分を除去
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const removeFile = (index: number) => {
@@ -76,32 +112,20 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
     setIsSubmitting(true);
 
     try {
-      // ファイルをBase64エンコード
-      const encodedFiles = await Promise.all(
-        files.map(async (file) => {
-          const base64 = await fileToBase64(file);
-          return {
-            name: file.name,
-            data: base64,
-            mimeType: file.type,
-          };
-        })
-      );
-
-      // 送信データを作成
+      // 送信データを作成（ファイルはすでにエンコード済み）
       const payload = {
         name: data.name,
         email: data.email,
         existingUrl: data.existingUrl,
         referenceUrls: referenceUrls,
         additionalRequests: data.additionalRequests,
-        files: encodedFiles,
+        files: files, // すでにエンコード済み
         hearingData: hearingData,
         priceBreakdown: priceBreakdown,
       };
 
       // GAS WebアプリにPOST
-      const response = await fetch(GAS_WEB_APP_URL, {
+      await fetch(GAS_WEB_APP_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,21 +143,6 @@ export default function ConsultationForm({ hearingData, data, onUpdate, onBack, 
       alert('送信中にエラーが発生しました。もう一度お試しください。');
       setIsSubmitting(false);
     }
-  };
-
-  // ファイルをBase64に変換
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        // "data:image/png;base64," の部分を除去
-        const base64Data = base64.split(',')[1];
-        resolve(base64Data);
-      };
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   return (
